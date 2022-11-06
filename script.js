@@ -1,3 +1,8 @@
+const regionBtn = document.getElementById('buttons');
+const countryBtn =document.getElementById('countries');
+let WorldData = {America:[],Asia :[],Africa:[], Europe:[], Oceania:[]};
+
+
 var welcome = document.querySelector('.welcome');
 document.addEventListener('DOMContentLoaded',()=>{
   setTimeout(() =>{
@@ -6,6 +11,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 })
 
+
+//helper function for data fetxh
 async function Fetch(url){
     try {
         const result = await fetch(url);
@@ -17,16 +24,14 @@ async function Fetch(url){
     }
 };
 
-let WorldData = {America:[],Asia :[],Africa:[], Europe:[], Oceania:[]};
+
 
 
 async function fetchCountryData(){
     for(continent in WorldData){
         console.log(WorldData[continent]);
         const Region = await Fetch(`https://restcountries.com/v3.1/region/${continent}`);
-
         Region.forEach((r) =>{
-
             const countryPopulation = r.population;
             const countryName = r.name.common;
             WorldData[continent].push({country:countryName,population:countryPopulation});
@@ -35,10 +40,10 @@ async function fetchCountryData(){
         
     }
 
-    //console.log(WorldData);
+
 }
 
-const fetchDataForcountry = async (country) => {
+const ftchCountryCities= async (country) => {
     try {
         const result = await fetch('https://countriesnow.space/api/v0.1/countries/population/cities/filter', {
             method: 'POST',
@@ -47,8 +52,8 @@ const fetchDataForcountry = async (country) => {
             },
             body: JSON.stringify({
                 'limit': 40,
-                'orderBy': "name",
-                'order': "asc",
+                'orderBy': "population",
+                'order': "dsc",
                 'country': country,
             }),
         });
@@ -66,23 +71,16 @@ const countriesBtns= document.getElementById("countries");
 
 function SetCountriesBtns(curr_region_arr){
     countriesBtns.innerHTML='';
-
     curr_region_arr.forEach((el) => {
-       
         const button = document.createElement('button');
         button.textContent = el.country;
         countriesBtns.appendChild(button);
     });
 }
-//curr_region_arr=WorldData.Asia;
-// const asia=document.getElementById('asia');
-// console.log(WorldData.Asia);
-// asia.addEventListener('click',SetCountriesBtns);
 
 
 
-const regionBtn = document.getElementById('buttons');
-const countryBtn =document.getElementById('countries');
+
 
 function handle_continent_btns(event){
     curr_region_arr=WorldData[event.target.textContent];
@@ -91,7 +89,7 @@ function handle_continent_btns(event){
     const labels = WorldData[event.target.textContent].map(el => el.country);
     const population = WorldData[event.target.textContent].map(el => el.population);
     let color=colors_by_region[event.target.textContent]
-    createChart(labels,population,color);
+    BulidChart(labels,population,color);
 }
 
 async function handle_country_btn(event){
@@ -104,17 +102,17 @@ async function handle_country_btn(event){
         const population = res.data.map((el) => {
             return el.populationCounts[0].value
         });
-        createChart(labels,population,"white");
+        BulidChart(labels,population,"pink");
         return;
     }
 
 }
 
-regionBtn.addEventListener('click',handle_continent_btns);
-countryBtn.addEventListener('click',handle_country_btn);
+// regionBtn.addEventListener('click',handle_continent_btns);
+// countryBtn.addEventListener('click',handle_country_btn);
 
 Chart.defaults.color='white';
-function createChart(labels, cur_data,color) {
+function BulidChart(labels, cur_data,color) {
     const curentChart = document.getElementById('myChart');
     const myChart = new Chart(curentChart, {
         type: 'bar',
@@ -125,6 +123,7 @@ function createChart(labels, cur_data,color) {
                 data: cur_data,
                 backgroundColor: color,
                 
+                
             }]
         },
         Option: {
@@ -132,3 +131,10 @@ function createChart(labels, cur_data,color) {
         }
     });
 };
+
+function set_all_btns(){
+    regionBtn.addEventListener('click',handle_continent_btns);
+    countryBtn.addEventListener('click',handle_country_btn);
+}
+
+set_all_btns();
